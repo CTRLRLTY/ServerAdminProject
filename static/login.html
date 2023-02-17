@@ -9,24 +9,21 @@
             <p id="info">hello world</p>
             <form action="/create-account" target="_self" method="post">
                 <div>
-                    <h1>Create an Account</h1>
+                    <h1>Login Now !!!</h1>
                     <label for="email"><b>Email</b></label>
                     <input type="text" placeholder="Enter Email" name="email" id="email" required>
 
                     <label for="password"><b>Password</b></label>
                     <input type="password" placeholder="Enter Password" name="password" id="password" required>
 
-                    <label for="password-confirm"><b>Repeat Password</b></label>
-                    <input type="password" placeholder="Enter Password" name="password-confirm" id="password-confirm" required>
-
-                    <button type="submit" onclick="handle_create_account(event)">Register</button>
+                    <button type="submit" onclick="handle_login(event)">Login</button>
                 </div>
 
                 <div class="signin">
-                    <p>Already have an account? <a href="login.html">Sign in</a></p>
+                    <p>Don't have an account? <a href="index.html">Create one now!</a></p>
                 </div>
             </form>
         </div>
-        <script src="register.js"></script>
+        <script src="login.js"></script>
     </body>
 </html>
