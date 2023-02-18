@@ -1,10 +1,10 @@
-function handle_create_account(ev)
+function handle_user(ev, endpoint)
 {
     ev.preventDefault();
 
     const form = new FormData(document.forms[0]);
 
-    fetch("/create-account", {method: 'POST', body: form})
+    fetch(endpoint, {method: 'POST', body: form})
         .then(async (response) => {
             switch (response.status)
             {
