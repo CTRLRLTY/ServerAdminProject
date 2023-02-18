@@ -6,17 +6,20 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
 
 func handleLogin(w http.ResponseWriter, r *http.Request) {
+
 	switch r.Method {
 	case "POST":
 		email := r.PostFormValue("email")
 		password := r.PostFormValue("password")
 
-		rows, err := db.Query("SELECT password FROM User WHERE email=?", email)
+		rows, err := db.Query("SELECT password FROM public.User WHERE email=$1", email)
 
 		if err != nil {
 			panic(err)
@@ -63,8 +66,7 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 			data["reason"] = "Password don't match"
 			json.NewEncoder(w).Encode(data)
 		} else {
-			insert_transact := `insert into "User" values ($1, $2)`
-			_, err := db.Exec(insert_transact, email, password)
+			_, err := db.Exec(`insert into public.User values ($1, $2)`, email, password)
 
 			if err != nil {
 				panic(err)
@@ -77,10 +79,6 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.Handle("/", http.FileServer(http.Dir("./static")))
-	http.HandleFunc("/create-account", handleRegister)
-	http.HandleFunc("/validate-account", handleLogin)
-
 	const (
 		host     = "localhost"
 		port     = 5400
@@ -92,7 +90,9 @@ func main() {
 	connection_string := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 
-	db, err := sql.Open("postgres", connection_string)
+	var err error
+
+	db, err = sql.Open("postgres", connection_string)
 
 	if err != nil {
 		panic(err)
@@ -105,6 +105,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	http.Handle("/", http.FileServer(http.Dir("./static")))
+	http.HandleFunc("/create-account", handleRegister)
+	http.HandleFunc("/validate-account", handleLogin)
 
 	fmt.Println("Starting!")
 	log.Fatal(http.ListenAndServe(":8080", nil))

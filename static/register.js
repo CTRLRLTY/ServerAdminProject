@@ -3,7 +3,6 @@ function handle_create_account(ev)
     ev.preventDefault();
 
     const form = new FormData(document.forms[0]);
-    elemInfo.style.display = "block";
 
     fetch("/create-account", {method: 'POST', body: form})
         .then(async (response) => {
