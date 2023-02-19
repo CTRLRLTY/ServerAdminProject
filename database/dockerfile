@@ -1,0 +1,5 @@
+FROM postgres
+
+COPY definition.sql /docker-entrypoint-initdb.d/
+
+EXPOSE 5432

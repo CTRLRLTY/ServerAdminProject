@@ -149,7 +149,7 @@ func main() {
 		port     = 5400
 		user     = "postgres"
 		password = "password"
-		dbname   = "some_db"
+		dbname   = "postgres"
 	)
 
 	connection_string := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",

@@ -1,7 +1,3 @@
-CREATE DATABASE IF NOT EXISTS some_db;
-
-USE some_db;
-
 CREATE TABLE IF NOT EXISTS public.User (
     email VARCHAR(50) PRIMARY KEY,
     password VARCHAR(50) NOT NULL

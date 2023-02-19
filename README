@@ -1,0 +1,7 @@
+build database
+    docker build -t some_db ./database
+
+run database
+    docker run -e POSTGRES_PASSWORD=password -p 5400:5432 --name db some_db
+
+
