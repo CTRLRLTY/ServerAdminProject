@@ -1,5 +1,26 @@
 (function() {
     document.getElementById("email").innerText = "welcome " + get_cookie("session");
+
+    fetch("/purchase-item-count")
+        .then(async (response) => {
+            switch (response.status)
+            {
+            case 200:
+                let data = await response.json();
+
+                for (let i = 0; i < data.length; ++i) 
+                {
+                    let columns = data[i];
+                    let index = columns[0];
+                    let amount = columns[1];
+
+                    elemLabelCount = document.querySelector(`.item:nth-child(${index+1}) .item-count`);
+                    elemLabelCount.innerText = amount;
+                }
+
+                break
+            }
+        });
 })();
 
 
@@ -23,26 +44,18 @@ function get_cookie(cname) {
   return "";
 }
 
-function handle_purchase(index, amount)
+async function handle_purchase(index, amount)
 {
     let fdata = new FormData();
     fdata.append("index", index);
     fdata.append("email", get_cookie("session"));
     fdata.append("amount", amount);
 
-    fetch("/purchase-item", {
+    let res = await fetch("/purchase-item", {
         method: 'POST',
-        // body: JSON.stringify({index, email: get_cookie("session"), amount})
         body: fdata
-    })
-        .then(async (response) => {
-            switch (response.status)
-            {
-            case 200:
-                let data = await response.json();
-                elemLabelCount = document.querySelector(`.item-${data.index} item-count`);
-                elemLabelCount.innerText = data.count;
-                break
-            }
-        });
+    });
+
+    if(res.ok) 
+        location.reload();
 }

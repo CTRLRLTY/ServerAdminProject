@@ -107,6 +107,42 @@ func handlePurchaseItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handlePurchaseItemCount(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		cookie, errc := r.Cookie("session")
+
+		if errc != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		email := cookie.Value
+
+		rows, err := db.Query("SELECT index, count FROM public.Item WHERE user_email=$1", email)
+
+		if err != nil {
+			panic(err)
+		}
+
+		defer rows.Close()
+
+		var columns [][]int
+
+		for rows.Next() {
+			cols := make([]int, 2)
+
+			if err := rows.Scan(&cols[0], &cols[1]); err != nil {
+				panic(err)
+			}
+
+			columns = append(columns, cols)
+		}
+
+		json.NewEncoder(w).Encode(columns)
+	}
+}
+
 func main() {
 	const (
 		host     = "localhost"
@@ -135,10 +171,11 @@ func main() {
 		panic(err)
 	}
 
-	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.HandleFunc("/create-account", handleRegister)
 	http.HandleFunc("/validate-account", handleLogin)
 	http.HandleFunc("/purchase-item", handlePurchaseItem)
+	http.HandleFunc("/purchase-item-count", handlePurchaseItemCount)
+	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	fmt.Println("Starting!")
 	log.Fatal(http.ListenAndServe(":8080", nil))
