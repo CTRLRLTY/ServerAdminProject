@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -13,7 +14,6 @@ import (
 var db *sql.DB
 
 func handleLogin(w http.ResponseWriter, r *http.Request) {
-
 	switch r.Method {
 	case "POST":
 		email := r.PostFormValue("email")
@@ -42,6 +42,11 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if password_matched {
+			http.SetCookie(w, &http.Cookie{
+				Name:    "session",
+				Value:   email,
+				Expires: time.Now().Add(5 * time.Minute),
+			})
 			w.Header().Set("Goto", "/menu.html")
 			w.WriteHeader(http.StatusSeeOther)
 		} else {
@@ -66,15 +71,39 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 			data["reason"] = "Password don't match"
 			json.NewEncoder(w).Encode(data)
 		} else {
-			_, err := db.Exec(`insert into public.User values ($1, $2)`, email, password)
+			_, err := db.Exec(`INSERT INTO public.User VALUES ($1, $2)`, email, password)
 
 			if err != nil {
 				panic(err)
 			}
 
-			w.Header().Set("Goto", "/menu.html")
+			w.Header().Set("Goto", "/login.html")
 			w.WriteHeader(http.StatusSeeOther)
 		}
+	}
+}
+
+func handlePurchaseItem(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		cookie, errc := r.Cookie("session")
+
+		if errc != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		user_email := cookie.Value
+		index := r.PostFormValue("index")
+		amount := r.PostFormValue("amount")
+
+		_, err := db.Exec(`CALL purchase_item($1, $2, $3)`, user_email, index, amount)
+
+		if err != nil {
+			panic(err)
+		}
+
+		w.WriteHeader(http.StatusAccepted)
 	}
 }
 
@@ -109,6 +138,7 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.HandleFunc("/create-account", handleRegister)
 	http.HandleFunc("/validate-account", handleLogin)
+	http.HandleFunc("/purchase-item", handlePurchaseItem)
 
 	fmt.Println("Starting!")
 	log.Fatal(http.ListenAndServe(":8080", nil))
