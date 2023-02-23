@@ -1,0 +1,17 @@
+FROM golang
+
+WORKDIR /app
+
+COPY . .
+
+ENV PORT=80
+
+EXPOSE $PORT
+
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=password
+ENV POSTGRES_DB=postgres
+ENV POSTGRES_PORT=5432
+ENV POSTGRES_HOST=pg_db
+
+CMD ["go", "run", "."]

@@ -2,4 +2,6 @@ FROM postgres
 
 COPY definition.sql /docker-entrypoint-initdb.d/
 
+ENV POSTGRES_PASSWORD=password
+
 EXPOSE 5432

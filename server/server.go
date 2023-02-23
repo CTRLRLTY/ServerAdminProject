@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -144,15 +145,15 @@ func handlePurchaseItemCount(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	const (
-		host     = "localhost"
-		port     = 5400
-		user     = "postgres"
-		password = "password"
-		dbname   = "postgres"
+	var (
+		host     = os.Getenv("POSTGRES_HOST")
+		port     = os.Getenv("POSTGRES_PORT")
+		user     = os.Getenv("POSTGRES_USER")
+		password = os.Getenv("POSTGRES_PASSWORD")
+		dbname   = os.Getenv("POSTGRES_DB")
 	)
 
-	connection_string := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+	connection_string := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 
 	var err error
@@ -177,6 +178,6 @@ func main() {
 	http.HandleFunc("/purchase-item-count", handlePurchaseItemCount)
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
-	fmt.Println("Starting!")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
+	fmt.Println("Listening on port: " + os.Getenv("PORT"))
 }
