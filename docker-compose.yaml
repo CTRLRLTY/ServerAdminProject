@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  pg_db:
+    build: ./database
+  web:
+    build: ./server
+    ports:
+      - '8080:80'
+    depends_on:
+      - pg_db
